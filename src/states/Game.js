@@ -7,28 +7,43 @@ export default class extends Phaser.State {
   preload() {}
 
   create() {
-    const bannerText = 'Phaser + ES6 + Webpack';
-    let banner = this.add.text(this.world.centerX, this.game.height - 80, bannerText);
-    banner.font = 'Bangers';
-    banner.padding.set(10, 16);
-    banner.fontSize = 40;
-    banner.fill = '#77BFA3';
-    banner.smoothed = false;
-    banner.anchor.setTo(0.5);
+    this.map = this.game.add.tilemap('level1');
+    this.map.addTilesetImage('gren_tileset', 'gameTiles');
 
-    this.mushroom = new Mushroom({
-      game: this.game,
-      x: this.world.centerX,
-      y: this.world.centerY,
-      asset: 'mushroom'
-    });
+    this.backgroundLayer = this.map.createLayer('backgroundLayer');
+    this.blockingLayer = this.map.createLayer('blockingLayer');
 
-    this.game.add.existing(this.mushroom);
+    this.map.setCollisionBetween(1, 100000, true, 'blockingLayer');
+
+    this.player = this.game.add.sprite(10, 10, 'mushroom');
+    this.game.physics.arcade.enable(this.player);
+    this.game.camera.follow(this.player);
+
+    this.cursors = this.game.input.keyboard.createCursorKeys();
+
+    this.backgroundLayer.resizeWorld();
+  }
+
+  update() {
+    this.game.physics.arcade.collide(this.player, this.blockingLayer);
+
+    this.player.body.velocity.y = 0;
+    this.player.body.velocity.x = 0;
+ 
+    const moveSpeed = 160;
+    if(this.cursors.up.isDown) {
+      this.player.body.velocity.y -= moveSpeed;
+    } else if(this.cursors.down.isDown) {
+      this.player.body.velocity.y += moveSpeed;
+    }
+    if(this.cursors.left.isDown) {
+      this.player.body.velocity.x -= moveSpeed;
+    }
+    else if(this.cursors.right.isDown) {
+      this.player.body.velocity.x += moveSpeed;
+    }
   }
 
   render() {
-    if (__DEV__) {
-      this.game.debug.spriteInfo(this.mushroom, 32, 32);
-    }
   }
 }

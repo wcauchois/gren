@@ -10,9 +10,6 @@ class Tile:
     self.id = id
     self.filename = os.path.join('assets', relative_filename)
 
-class BreakIt(Exception):
-  pass
-
 if __name__ == '__main__':
   tree = ET.parse('assets/gren_tileset.tsx')
   root = tree.getroot()

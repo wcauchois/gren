@@ -19,7 +19,8 @@ export default class extends Phaser.State {
     this.game.physics.arcade.enable(this.skeleton);
     this.skeleton.body.immovable = true;
 
-    this.player = this.game.add.sprite(10, 10, 'charSprites', 15);
+    const playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
+    this.player = this.game.add.sprite(playerStarts[0].x, playerStarts[0].y, 'charSprites', 15);
     this.player.animations.add('walk', [
       15, 16, 17, 18, 20, 21, 22, 23
     ]);
@@ -33,7 +34,38 @@ export default class extends Phaser.State {
 
     this.game.input.keyboard.addKey(Phaser.KeyCode.Z).onDown.add(this.onZDown.bind(this));
 
+    this.createItems();
+    // const rupee = this.game.add.sprite(50, 50, 'rupee');
+    // rupee.animations.add('idle');
+    // rupee.animations.play('idle', 10, true);
+
     this.dialogState = 'none';
+  }
+
+  createItems() {
+    this.items = this.game.add.group();
+    this.items.enableBody = true;
+    const rupees = this.findObjectsByType('rupee', this.map, 'objectLayer');
+    rupees.forEach(element => {
+      const newRupee = this.items.create(element.x, element.y, 'rupee');
+      newRupee.body.setSize(8, 6, 16, 23);
+      newRupee.animations.add('idle');
+      newRupee.animations.play('idle', 10, true);
+    });
+  }
+
+  findObjectsByType(type, map, layer) {
+    const result = [];
+    map.objects[layer].forEach(element => {
+      if (element.type === type) {
+        // Phaser uses top left, Tiled bottom left so we have to adjust
+        const newElement = Object.assign({}, element, {
+          y: element.y - map.tileHeight
+        });
+        result.push(newElement);
+      }
+    });
+    return result;
   }
 
   onZDown() {
@@ -62,9 +94,15 @@ of vapor and light, beyond holland and into the hills, I have come to`;
     dialogGroup.alignIn(this.game.camera.view, Phaser.CENTER);
   }
 
+  collect(player, collectable) {
+    collectable.destroy();
+    this.sound.play('coin_sound', 0.5);
+  }
+
   update() {
     this.game.physics.arcade.collide(this.player, this.skeleton);
     this.game.physics.arcade.collide(this.player, this.blockingLayer);
+    this.game.physics.arcade.overlap(this.player, this.items, this.collect.bind(this), null, this);
 
     this.player.body.velocity.y = 0;
     this.player.body.velocity.x = 0;

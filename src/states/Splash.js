@@ -32,9 +32,20 @@ export default class extends Phaser.State {
     this.load.atlas('charSprites', 'assets/char_sprites.png', null, {
       frames: frames
     });
+    this.load.spritesheet('rupee', 'assets/rupee_sprite.png', 36, 36, 24 /* maxFrames */);
+    this.load.audio('coin_sound', 'assets/coin_sound.mp3');
+
+    this.soundsDecoded = false;
+    this.sound.setDecodedCallback(['coin_sound'], this.onSoundsDecoded, this);
   }
 
-  create() {
-    this.state.start('Game');
+  onSoundsDecoded() {
+    this.soundsDecoded = true;
+  }
+
+  render() {
+    if (this.soundsDecoded) {
+      this.state.start('Game');
+    }
   }
 }

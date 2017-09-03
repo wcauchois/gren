@@ -12,8 +12,26 @@ export default class extends Phaser.State {
     this.load.setPreloadSprite(this.loaderBar);
 
     this.load.image('mushroom', 'assets/images/mushroom2.png');
+    this.load.image('skeleton', 'assets/skeleton.png');
     this.load.tilemap('level1', 'assets/gren_map.json', null, Phaser.Tilemap.TILED_JSON);
     this.load.image('gameTiles', 'assets/tileset_atlas.png');
+    const frameSize = 48;
+    const w = 5, h = 8;
+    const frames = [];
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        frames.push({frame: {
+          x: x * frameSize,
+          y: y * frameSize,
+          w: frameSize,
+          h: frameSize,
+          filename: `frame_${x + y * w}`
+        }});
+      }
+    }
+    this.load.atlas('charSprites', 'assets/char_sprites.png', null, {
+      frames: frames
+    });
   }
 
   create() {

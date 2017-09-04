@@ -23,7 +23,7 @@ if __name__ == '__main__':
     "tileheight": 40
   }]
   # https://bugs.python.org/issue16333
-  out_string = json.dumps(map_json, indent=2, separators=(',', ':'))
+  out_string = json.dumps(map_json, indent=2, separators=(',', ':'), sort_keys=True)
   for (i, data) in enumerate(data_arrays):
     out_string = out_string.replace('"<<DATA:{}>>"'.format(i), json.dumps(data))
   with open('assets/gren_map.json', 'w') as fp:

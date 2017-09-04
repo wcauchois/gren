@@ -1,6 +1,62 @@
 /* globals __DEV__ */
 import Phaser from 'phaser';
 import Mushroom from '../sprites/Mushroom';
+import {defaultFont} from '../config';
+import strings from '../strings';
+
+class Dialog extends Phaser.Group {
+  constructor(game, content) {
+    super(game);
+    this.content = content;
+    this.counter = 0;
+    this.showArrow = true;
+
+    this.graphics = new Phaser.Graphics(this.game, 0, 0);
+    this.redrawGraphics();
+    this.add(this.graphics);
+
+    this.text = new Phaser.Text(this.game, 10, 10, content, {
+      fill: '#fff',
+      font: defaultFont,
+      fontSize: 14,
+      wordWrap: true,
+      wordWrapWidth: 460
+    });
+    this.add(this.text);
+
+    this.alignIn(this.game.camera.view, Phaser.BOTTOM_CENTER, 0, -40);
+  }
+
+  redrawGraphics() {
+    this.graphics.clear();
+    this.graphics.beginFill(0);
+    this.graphics.drawRect(0, 0, 500, 75);
+    this.graphics.endFill();
+    if (this.showArrow) {
+      this.graphics.beginFill(0xffffff);
+      this.graphics.drawTriangle([
+        new Phaser.Point(480, 10),
+        new Phaser.Point(490, 37.5),
+        new Phaser.Point(480, 65),
+      ]);
+    }
+    this.graphics.endFill();
+  }
+
+  update() {
+    const interval = 30;
+    this.counter += 1;
+    if (this.counter > interval) {
+      this.counter = 0;
+      this.showArrow = !this.showArrow;
+      this.redrawGraphics();
+    }
+  }
+
+  advance() {
+    this.destroy();
+  }
+}
 
 export default class extends Phaser.State {
   init() {}
@@ -14,10 +70,6 @@ export default class extends Phaser.State {
     this.blockingLayer = this.map.createLayer('blockingLayer');
 
     this.map.setCollisionBetween(1, 100000, true, 'blockingLayer');
-
-    this.skeleton = this.game.add.sprite(100, 100, 'skeleton');
-    this.game.physics.arcade.enable(this.skeleton);
-    this.skeleton.body.immovable = true;
 
     const playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
     this.player = this.game.add.sprite(playerStarts[0].x, playerStarts[0].y, 'charSprites', 15);
@@ -35,11 +87,23 @@ export default class extends Phaser.State {
     this.game.input.keyboard.addKey(Phaser.KeyCode.Z).onDown.add(this.onZDown.bind(this));
 
     this.createItems();
-    // const rupee = this.game.add.sprite(50, 50, 'rupee');
-    // rupee.animations.add('idle');
-    // rupee.animations.play('idle', 10, true);
+    this.createNpcs();
 
-    this.dialogState = 'none';
+    this.dialog = null;
+    this.objectTouched = null;
+  }
+
+  createNpcs() {
+    this.npcs = this.game.add.group();
+    this.npcs.enableBody = true;
+    console.log(this.findObjectsByType('npc', this.map, 'objectLayer'));
+    this.findObjectsByType('npc', this.map, 'objectLayer').forEach(item => {
+      console.log(item);
+      const npc = this.npcs.create(item.x, item.y, item.properties.sprite);
+      Object.assign(npc.data, item.properties);
+      this.game.physics.arcade.enable(npc);
+      npc.body.immovable = true;
+    });
   }
 
   createItems() {
@@ -68,30 +132,27 @@ export default class extends Phaser.State {
     return result;
   }
 
-  onZDown() {
-    this.dialogState = 'shown';
-    const dialogGroup = this.game.add.group();
-
-    const graphics = new Phaser.Graphics(this.game, 0, 0);
-    graphics.beginFill('#000');
-    graphics.drawRect(0, 0, 500, 75);
-    graphics.endFill();
-    dialogGroup.add(graphics);
-
-    const content = `\
-But I still hear them walking in the trees; not speaking. \
-Waiting here, away from the terrifying weaponry, out of the halls \
-of vapor and light, beyond holland and into the hills, I have come to`;
-    const text = new Phaser.Text(this.game, 10, 10, content, {
-      fill: '#fff',
-      font: 'Inconsolata',
-      fontSize: 14,
-      wordWrap: true,
-      wordWrapWidth: 480
+  showDialog(content) {
+    if (this.dialog) {
+      return;
+    }
+    this.dialog = new Dialog(this.game, content);
+    this.game.world.add(this.dialog);
+    this.dialog.onDestroy.add(() => {
+      this.dialog = null;
     });
-    dialogGroup.add(text);
+  }
 
-    dialogGroup.alignIn(this.game.camera.view, Phaser.CENTER);
+  onZDown() {
+    if (!this.dialog) {
+      if (this.objectTouched) {
+        if ('string' in this.objectTouched.data) {
+          this.showDialog(strings[this.objectTouched.data['string']]);
+        }
+      }
+    } else {
+      this.dialog.advance();
+    }
   }
 
   collect(player, collectable) {
@@ -99,29 +160,46 @@ of vapor and light, beyond holland and into the hills, I have come to`;
     this.sound.play('coin_sound', 0.5);
   }
 
+  npcTouched(player, npc) {
+
+  }
+
   update() {
-    this.game.physics.arcade.collide(this.player, this.skeleton);
+    this.objectTouched = null;
+    const inflationAmount = 5
+    const playerInflatedBounds = this.player.getBounds().inflate(inflationAmount, inflationAmount);
+    // TODO: Disambiguate multiple touched objects by distance.
+    this.npcs.forEach(npc => {
+      if (npc.getBounds().intersects(playerInflatedBounds)) {
+        this.objectTouched = npc;
+      }
+    });
+    this.game.physics.arcade.collide(this.player, this.npcs);
     this.game.physics.arcade.collide(this.player, this.blockingLayer);
-    this.game.physics.arcade.overlap(this.player, this.items, this.collect.bind(this), null, this);
+    this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
     this.player.body.velocity.y = 0;
     this.player.body.velocity.x = 0;
 
+    const canMove = !this.dialog;
     const moveSpeed = 160;
     let xVel = 0, yVel = 0;
-    if(this.cursors.up.isDown) {
-      yVel = -moveSpeed;
-    } else if(this.cursors.down.isDown) {
-      yVel = moveSpeed;
+
+    if (canMove) {
+      if(this.cursors.up.isDown) {
+        yVel = -moveSpeed;
+      } else if(this.cursors.down.isDown) {
+        yVel = moveSpeed;
+      }
+      if(this.cursors.left.isDown) {
+        xVel = -moveSpeed;
+      }
+      else if(this.cursors.right.isDown) {
+        xVel = moveSpeed;
+      }
+      this.player.body.velocity.x += xVel;
+      this.player.body.velocity.y += yVel;
     }
-    if(this.cursors.left.isDown) {
-      xVel = -moveSpeed;
-    }
-    else if(this.cursors.right.isDown) {
-      xVel = moveSpeed;
-    }
-    this.player.body.velocity.x += xVel;
-    this.player.body.velocity.y += yVel;
     if (xVel != 0 || yVel != 0) {
       this.player.animations.play('walk', 10, true);
       this.player.rotation = Math.atan2(yVel, xVel) - Math.PI / 2.0;

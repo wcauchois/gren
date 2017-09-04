@@ -163,10 +163,6 @@ export default class extends Phaser.State {
     this.sound.play('coin_sound', 0.5);
   }
 
-  npcTouched(player, npc) {
-
-  }
-
   update() {
     this.objectTouched = null;
     const inflationAmount = 5

@@ -160,7 +160,7 @@
           "type":"npc",
           "visible":true,
           "width":40,
-          "x":300,
+          "x":380,
           "y":500
         },
         {
@@ -180,7 +180,7 @@
           "type":"npc",
           "visible":true,
           "width":40,
-          "x":340,
+          "x":500,
           "y":500
         },
         {
@@ -200,7 +200,7 @@
           "type":"npc",
           "visible":true,
           "width":40,
-          "x":380,
+          "x":620,
           "y":500
         }
       ],

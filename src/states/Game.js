@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import Mushroom from '../sprites/Mushroom';
 import {defaultFont} from '../config';
 import strings from '../strings';
+import {objectCenter} from '../utils';
 
 class Dialog extends Phaser.Group {
   constructor(game, content) {
@@ -25,6 +26,7 @@ class Dialog extends Phaser.Group {
     this.add(this.text);
 
     this.alignIn(this.game.camera.view, Phaser.BOTTOM_CENTER, 0, -40);
+    this.game.sound.play('interact1', 0.5);
   }
 
   redrawGraphics() {
@@ -54,6 +56,7 @@ class Dialog extends Phaser.Group {
   }
 
   advance() {
+    this.game.sound.play('interact2', 0.5);
     this.destroy();
   }
 }
@@ -168,10 +171,17 @@ export default class extends Phaser.State {
     this.objectTouched = null;
     const inflationAmount = 5
     const playerInflatedBounds = this.player.getBounds().inflate(inflationAmount, inflationAmount);
+    const playerCenter = objectCenter(this.player);
     // TODO: Disambiguate multiple touched objects by distance.
+    let currentDistance = null;
     this.npcs.forEach(npc => {
       if (npc.getBounds().intersects(playerInflatedBounds)) {
-        this.objectTouched = npc;
+        const npcCenter = objectCenter(npc);
+        const npcDistance = npcCenter.distance(playerCenter);
+        if (!this.objectTouched || npcDistance < currentDistance) {
+          this.objectTouched = npc;
+          currentDistance = npcDistance;
+        }
       }
     });
     this.game.physics.arcade.collide(this.player, this.npcs);

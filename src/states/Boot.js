@@ -5,7 +5,6 @@ export default class extends Phaser.State {
   init() {
     this.stage.backgroundColor = '#EDEEC9';
     this.fontsReady = false;
-    this.fontsLoaded = this.fontsLoaded.bind(this);
   }
 
   preload() {
@@ -13,15 +12,10 @@ export default class extends Phaser.State {
       google: {
         families: ['Inconsolata']
       },
-      active: this.fontsLoaded
+      active: this.fontsLoaded.bind(this)
     });
 
-    let text = this.add.text(this.world.centerX, this.world.centerY, 'loading fonts', { font: '16px Arial', fill: '#dddddd', align: 'center' });
-    text.anchor.setTo(0.5, 0.5);
-
     this.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    this.scale.pageAlignHorizontally = true;
-    this.scale.pageAlignVertically = true;
 
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
 

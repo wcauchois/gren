@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "webpack",
     "deploy": "webpack --config webpack.production.config.js",
-    "test": "eslint ./src/**/**.js"
+    "test": "eslint ./src/**/**.js",
+    "watch-map": "$HOME/venvs/when-changed/bin/when-changed assets/gren_map.json ./scripts/rewrite_map.py"
   },
   "devDependencies": {
     "babel-core": "^6.25.0",

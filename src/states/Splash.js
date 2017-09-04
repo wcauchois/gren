@@ -34,9 +34,13 @@ export default class extends Phaser.State {
     });
     this.load.spritesheet('rupee', 'assets/rupee_sprite.png', 36, 36, 24 /* maxFrames */);
     this.load.audio('coin_sound', 'assets/coin_sound.mp3');
+    this.load.audio('interact1', 'assets/interact1.mp3');
+    this.load.audio('interact2', 'assets/interact2.mp3');
 
     this.soundsDecoded = false;
-    this.sound.setDecodedCallback(['coin_sound'], this.onSoundsDecoded, this);
+    this.sound.setDecodedCallback([
+      'coin_sound', 'interact1', 'interact2'
+    ], this.onSoundsDecoded, this);
   }
 
   onSoundsDecoded() {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<tileset name="gren_tileset" tilewidth="40" tileheight="40" tilecount="17" columns="0">
+<tileset name="gren_tileset" tilewidth="40" tileheight="40" tilecount="21" columns="0">
  <grid orientation="orthogonal" width="1" height="1"/>
  <terraintypes>
   <terrain name="dirt" tile="16"/>
@@ -55,5 +55,17 @@
  </tile>
  <tile id="21">
   <image width="40" height="40" source="tiles/purplecircle.png"/>
+ </tile>
+ <tile id="22">
+  <image width="40" height="40" source="tiles/brick_square_blue"/>
+ </tile>
+ <tile id="23">
+  <image width="40" height="40" source="tiles/brick_square_gray"/>
+ </tile>
+ <tile id="24">
+  <image width="40" height="40" source="tiles/brick_square_red"/>
+ </tile>
+ <tile id="25">
+  <image width="40" height="40" source="tiles/floor.png"/>
  </tile>
 </tileset>

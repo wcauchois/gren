@@ -21,7 +21,8 @@ if __name__ == '__main__':
     t = Tile(id, source)
     tiles.append(t)
     tiles_by_id[t.id] = t
-  dim = int(math.ceil(math.sqrt(float(max(tiles, key=lambda t: t.id).id))))
+  max_tile_id = max(tiles, key=lambda t: t.id).id
+  dim = int(math.ceil(math.sqrt(max_tile_id + 1)))
   tile_size = 40 # Hardcoded for now
 
   atlas_size = dim * tile_size

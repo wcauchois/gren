@@ -1,3 +1,5 @@
+import Phaser from 'phaser';
+
 export function centerGameObjects(objects) {
   objects.forEach(object => {
     object.anchor.setTo(0.5);
@@ -10,6 +12,10 @@ export function range(begin, end) {
     result.push(i);
   }
   return result;
+}
+
+export function objectCenter(obj) {
+  return new Phaser.Point(obj.centerX, obj.centerY);
 }
 
 export function cross() {
